@@ -31,44 +31,57 @@ async function findByTestsDisciplines() {
     
     return await prisma.terms.findMany({
 
-    include: {
-            disciplines:{
-                include: {
-                    tests:{
-                        include: {
-                            teachers: true 
+        include: {
+                disciplines:{
+                    select: {
+                        name: true,
+                        tests:{
+                            select: {
+                                name: true,
+                                pdfUrl: true,
+                                teachers: {
+                                            select:{
+                                                name: true
+                                            }
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    
+    });
+    
+}
+
+async function findByTestsTeachers() {
+    
+    return  await prisma.teachers.findMany({
+
+        include:{
+            tests:{
+                select: {
+                    name: true,
+                    pdfUrl: true,
+                    discipline: {
+                        select: { name: true,
+                                term: {
+                                    select: { number: true }
+                                } 
                         }
                     }
                 }
             }
-    }
-    
-
-    
-
-    //     Category: { select : { name: true} },
-    //     teachersDisciplines: { 
-
-    //         include: { 
-    //             discipline: { 
-    //                             select:{ name: true} 
-    //                         },
-    //             teacher: {
-    //                     select: { name: true }
-    //             }
-    //         }
-            
-    //     }
-    // }
-            
-
+        }
     });
     
 }
+    
 
 export default {
     insert,
     findById,
     findByEmail,
-    findByTestsDisciplines
+    findByTestsDisciplines,
+    findByTestsTeachers
 }

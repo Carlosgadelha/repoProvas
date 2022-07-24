@@ -18,3 +18,10 @@ export async function testPerCategories(req: Request, res: Response) {
     
 }
 
+export async function testPerTeachers(req: Request, res: Response) {
+    
+    const tests = await testsServices.findByTestsTeachers();
+    return res.send(tests);
+    
+}
+
