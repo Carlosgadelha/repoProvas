@@ -2,7 +2,7 @@ import app from '../app.js';
 import supertest from 'supertest';
 import { prisma } from '../src/config/database.js';
 
-const user = {
+export const user = {
 
     email: 'mateus@gmail.com.br',
     password: '123456789ghhgh',

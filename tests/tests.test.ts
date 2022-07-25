@@ -1,18 +1,26 @@
 import app from '../app.js';
 import supertest from 'supertest';
 import { prisma } from '../src/config/database.js';
+import { user } from './app.test.js';
 
 const test = {
 
     name: 'Prova 01',
     pdfUrl: 'https://www.google.com',
     categoryId: 1,
-    teachersDisciplineId: 1,
+    teacherId: 1,
+    disciplineId: 1
+
 
 }
+beforeAll( async () =>{
+    await prisma.$executeRaw`DELETE FROM users WHERE email = ${user.email}`;
+    await supertest(app).post("/signup").send(user);
+})
 
 beforeEach(async () => {
     await prisma.$executeRaw`DELETE FROM tests WHERE name = ${test.name}`;
+    await supertest(app).post("/signin").send(user);
 });
 
 describe("POST /test", () => {
@@ -21,7 +29,7 @@ describe("POST /test", () => {
         const result = await supertest(app).post("/test").send(test);
         const status = result.status;
 
-        const testCriado = await prisma.tests.findUnique({
+        const testCriado = await prisma.tests.findMany({
             where: { name: test.name }
         });
         
@@ -42,10 +50,9 @@ describe("POST /test", () => {
     });
 
     it("given a categortId not exist it should return 404", async () => {
-            
+            test.categoryId = 100
             const testinvalid = {
-                ...test,
-                categoryId: 100
+                ...test
             }
     
             const result = await supertest(app).post("/test").send(testinvalid);
@@ -69,9 +76,37 @@ describe("POST /test", () => {
     }
 );
 
+
+});
+
+describe("GET /testPerCategories", () => {
+    it("when searching for proofs by category it should return 200", async () => {
+        
+        const result = await supertest(app).get("/testPerCategories").send(
+
+        );
+        const status = result.status;
+        
+        expect(status).toEqual(200);
+        
+    });
+
+});
+
+describe("GET /testPerTeachers", () => {
+    it("when searching for evidence by an instructor, it should return 200", async () => {
+
+        const result = await supertest(app).get("/testPerTeachers");
+        const status = result.status;
+        
+        expect(status).toEqual(200);
+        
+    });
+
 });
 
 
 afterAll(async () => {
+    await prisma.$executeRaw`DELETE FROM users WHERE email = ${user.email}`;
     await prisma.$disconnect();
 });
